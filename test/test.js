@@ -490,11 +490,63 @@ asyncTest('headers can be inspected via setRequestHeader()', function() {
 	});
 });
 
+module('Timeout');
+asyncTest('explicit timeout callbacks', function() {
+	var mock = $.mockjax({
+		url: '/xhr-timeout',
+		isTimeout: true,
+		responseText: {}
+	});
+	var finish = function() {
+		$.mockjaxClear(mock);
+		start();
+	}
+
+	$.ajax({
+		url: '/xhr-timeout',
+		dataType: 'json',
+		success: function() {
+			ok(false, 'timeout should not succeed');
+			finish();
+		},
+		error: function(xhr, textStatus, errorThrown) {
+			ok(true, 'timeout triggered an error as expected');
+			finish();
+		}
+	});
+});
+asyncTest('explicit timeout deferred', function() {
+	if (!$.Deferred) {
+		ok(true, 'cannot test deferreds on this version of jQuery');
+		start();
+		return;
+	}
+	var mock = $.mockjax({
+		url: '/xhr-timeout-deferred',
+		isTimeout: true,
+		responseText: {}
+	});
+	var finish = function() {
+		$.mockjaxClear(mock);
+		start();
+	}
+
+	$.ajax({
+		url: '/xhr-timeout-deferred',
+		dataType: 'json'
+	}).done(function() {
+		ok(false, 'timeout should not succeed');
+		finish();
+	}).fail(function(xhr, textStatus, errorThrown) {
+		ok(true, 'timeout triggered an error as expected');
+		finish();
+	});
+});
+
 
 // TODO: SIMULATING HTTP RESPONSE STATUSES
 // TODO: SETTING THE CONTENT-TYPE
 // TODO: SETTING ADDITIONAL HTTP RESPONSE HEADERS
-// TODO: FORCE SIMULATION OF SERVER TIMEOUTS
 // TODO: DYNAMICALLY GENERATING MOCK DEFINITIONS
 // TODO: DYNAMICALLY GENERATING MOCK RESPONSES
 /*
